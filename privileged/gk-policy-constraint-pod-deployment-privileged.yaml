@@ -1,0 +1,50 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPPrivilegedContainer
+metadata:
+  name: psp-privileged-container
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-system"]
+
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspprivilegedcontainer
+  annotations:
+    description: Controls running of privileged containers.
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPPrivilegedContainer
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspprivileged
+        violation[{"msg": msg, "details": {}}] {
+            c := containers[_]
+            c.securityContext.privileged
+            msg := sprintf("Privileged container is not allowed: %v, securityContext: %v", [c.name, c.securityContext])
+        }
+
+        containers[c] {
+          c = input.review.object.spec.containers[_]
+        }
+
+        containers[c] {
+          c = input.review.object.spec.initContainers[_]
+        }
+
+        containers[c] {
+          c = input.review.object.spec.template.spec.containers[_]
+        }
+
+        containers[c] {
+          c = input.review.object.spec.template.spec.initContainers[_]
+        }

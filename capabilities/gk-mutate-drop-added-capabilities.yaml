@@ -1,0 +1,23 @@
+# This mutating policy does not work yet, as the policy is not capable of removing the added capabilities from the add list
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: Assign
+metadata:
+  name: drop-all-capabilities-but
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: ["*"]
+      kinds: ["Pod"]
+  location: "spec.containers[name:*].securityContext.capabilities"
+  parameters:
+    assignIf:
+      add:
+        in: CAP_SETUID
+    assign:
+      drop: CAP_SETUID

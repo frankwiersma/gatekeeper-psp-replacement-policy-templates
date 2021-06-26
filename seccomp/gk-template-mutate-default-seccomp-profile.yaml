@@ -1,0 +1,24 @@
+# Source: Experimental Mutating Policies from Gatekeeper Library
+# https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/experimental/mutation/pod-security-policy/seccomp/samples/mutation.yaml
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: Assign
+metadata:
+  name: k8spspseccomp
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]
+  location: spec.securityContext.seccompProfile.type
+  parameters:
+    pathTests:
+    - subPath: spec.securityContext.seccompProfile.type
+      condition: MustNotExist
+    assign:
+      value: Unconfined

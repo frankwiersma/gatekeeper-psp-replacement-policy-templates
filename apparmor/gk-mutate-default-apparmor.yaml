@@ -1,0 +1,17 @@
+# Source: Experimental Mutating Policies from Gatekeeper Library
+# https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/experimental/mutation/pod-security-policy/apparmor/samples/mutation.yaml
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: AssignMetadata
+metadata:
+  name: k8spspapparmor
+spec:
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: [""]
+      kinds: ["Pod"]
+  location: metadata.annotations."apparmor.security.beta.kubernetes.io/pod"
+  parameters:
+    assign:
+      value: runtime/default

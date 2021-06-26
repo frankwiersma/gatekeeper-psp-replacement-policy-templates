@@ -1,0 +1,39 @@
+# maartenvdezz & frankwiersma
+# Experimental template
+# Created: 23-06-2021
+# Gatekeeper validating policy to whitelist sysctls
+# Based on forbidden sysctls (blacklist)
+
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspallowedunsafesysctls
+  annotations:
+    description: Controls the `sysctl` profile used by containers.
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPAllowedUnsafeSysctls
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedUnsafeSysctls:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspallowedunsafesysctls
+
+        violation[{"msg": msg, "details": {}}] {
+            sysctl := input.review.object.spec.securityContext.sysctls[_].name
+            allowedUnsafeSysctls(sysctl)
+            msg := sprintf("The sysctl %v is not allowed, pod: %v. Forbidden sysctls: %v", [sysctl, input.review.object.metadata.name, input.parameters.forbiddenSysctls])
+        }
+
+        allowedUnsafeSysctls(sysctl) {
+            input.parameters.allowedUnsafeSysctls[_] == sysctl
+        }   

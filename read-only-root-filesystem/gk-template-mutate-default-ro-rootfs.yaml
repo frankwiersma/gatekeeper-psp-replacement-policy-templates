@@ -1,0 +1,19 @@
+# Source: Experimental Mutating Policies from Gatekeeper Library
+# https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/experimental/mutation/pod-security-policy/read-only-root-filesystem/samples/mutation.yaml
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: Assign
+metadata:
+  name: k8spspreadonlyrootfs
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  location: "spec.containers[name:*].securityContext.readOnlyRootFilesystem"
+  parameters:
+    pathTests:
+    - subPath: "spec.containers[name:*].securityContext.readOnlyRootFilesystem"
+      condition: MustNotExist
+    assign:
+      value: true

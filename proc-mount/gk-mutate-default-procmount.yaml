@@ -1,0 +1,25 @@
+# maartenvdezz & frankwiersma
+# Experimental template
+# Created: 23-06-2021
+# Gatekeeper mutating policy to set default proc mount
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: Assign
+metadata:
+  name: assign-default-proc-mount
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  match:
+    scope: Namespaced
+    kinds:
+    - apiGroups: ["*"]
+      kinds: ["Pod"]
+  location: "spec.containers[name:*].securityContext.procMount"
+  parameters:
+    assignIf:
+      in: "Unmasked"
+    assign:
+      value: "Default"

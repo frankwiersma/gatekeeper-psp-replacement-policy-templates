@@ -1,0 +1,36 @@
+# Based on AppArmor whitelist from Gatekeeper PSP library
+
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspallowedunsafesysctls
+  annotations:
+    description: Test Whitelist Unsafe Sysctls
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPAllowedUnsafeSysctls
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedUnsafeSysctls:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspallowedunsafesysctls
+
+        violation[{"msg": msg, "details": {}}] {
+            sysctl := input.review.object.spec.securityContext
+            allowedUnsafeSysctls(sysctl)
+            not input_allowed_unsafe_sysctls(sysctl)
+            msg := sprintf("The sysctl is not whitelisted")
+        }
+
+        input_allowed_unsafe_sysctls(sysctl) {
+            sysctl.sysctls[_].name == input.parameters.allowedUnsafeSysctls[_]
+        }

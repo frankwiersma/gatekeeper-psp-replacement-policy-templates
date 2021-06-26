@@ -1,0 +1,16 @@
+# Source: 
+# https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/pod-security-policy/flexvolume-drivers/samples/psp-flexvolume-drivers/constraint.yaml
+
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPFlexVolumes
+metadata:
+  name: psp-flexvolume-drivers
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    allowedFlexVolumes: #[]
+    - driver: "example/lvm"
+    - driver: "example/cifs"

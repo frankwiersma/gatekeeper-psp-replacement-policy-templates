@@ -1,0 +1,16 @@
+# Source: Experimental Mutating Policies from Gatekeeper Library
+# https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/experimental/mutation/pod-security-policy/capabilities/samples/mutation.yaml
+
+apiVersion: mutations.gatekeeper.sh/v1alpha1
+kind: Assign
+metadata:
+  name: k8spspcapabilities
+spec:
+  applyTo:
+  - groups: [""]
+    kinds: ["Pod"]
+    versions: ["v1"]
+  location: "spec.containers[name:*].securityContext.capabilities.add"
+  parameters:
+    assign:
+      value: ["NEW_CAPABILITY"] # default add capability
